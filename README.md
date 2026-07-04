@@ -1,73 +1,138 @@
-# LexGraph
+# 🚀 LexGraph
 
-Contract intelligence system with hybrid GraphRAG:
-- semantic retrieval
-- clause-type-aware retrieval
-- graph neighborhood expansion (multi-hop)
-- confidence-aware LLM answering
-- unsafe-claim guardrails
-- continuous contract chat
+> **Hybrid GraphRAG for Intelligent Contract Analysis**
 
-## Features
+LexGraph is an AI-powered contract intelligence system that combines **semantic retrieval**, **knowledge graphs (Neo4j)**, and **Large Language Models (LLMs)** to answer legal questions with high-quality evidence retrieval. Instead of relying solely on vector similarity, LexGraph enriches retrieval using graph relationships, clause types, and confidence-aware reasoning.
 
-- Upload `PDF` or `TXT` contracts in Streamlit.
-- Parse and split contracts into clauses.
-- Extract legal entities and clause-type signals.
-- Build/sync contract graph in Neo4j.
-- Retrieve context via:
-  - clause-type classification
-  - semantic vector search
-  - graph expansion (nearby and concept-linked clauses)
-  - missing-clause recovery for expected governing clause families
-- Generate final legal answers from LLM using retrieved context only.
-- Return supporting clauses with each answer.
-- Continuous chat with retrieval over same contract.
+---
 
-## Project Structure
+## ✨ Key Features
 
-- `app.py` - Streamlit application
-- `utils/query_engine.py` - GraphRAG orchestration and retrieval flow
-- `utils/answer_generator.py` - LLM synthesis, confidence policy, unsafe-claim guard
-- `utils/graph_builder.py` - Neo4j graph construction
-- `utils/vector_store.py` - FAISS vector index build/load/search
-- `utils/clause_parser.py` - clause segmentation
-- `utils/extractor.py` - entity and rule extraction
-- `utils/pdf_loader.py` - PDF text extraction
-- `utils/neo4j_handler.py` - Neo4j client wrapper
+* 📄 Upload and analyze **PDF** or **TXT** contracts
+* 🧩 Automatic contract parsing and clause segmentation
+* 🏷️ Clause-type classification for targeted retrieval
+* 🕸️ Knowledge graph construction using **Neo4j**
+* 🔍 Hybrid retrieval combining:
 
-## Prerequisites
+  * Semantic vector search (FAISS)
+  * Clause-type-aware retrieval
+  * Multi-hop graph expansion
+* 🤖 Confidence-aware LLM answer generation
+* 🛡️ Unsafe claim detection and evidence-based guardrails
+* 💬 Continuous contract chat with conversational context
+* 📌 Supporting clause citations with every response
 
-- Python 3.12+
-- Neo4j database (for full GraphRAG path)
-- API key for LLM provider compatible with OpenAI SDK
+---
 
-## Installation
+# 🏗️ Architecture
+
+```text
+                Contract (PDF / TXT)
+                        │
+                        ▼
+              Clause Parsing & Extraction
+                        │
+        ┌───────────────┴───────────────┐
+        ▼                               ▼
+  Semantic Embeddings             Clause Classification
+        │                               │
+        └───────────────┬───────────────┘
+                        ▼
+              Neo4j Knowledge Graph
+                        │
+                        ▼
+              Hybrid GraphRAG Retrieval
+                        │
+                        ▼
+          Confidence-aware LLM Answer
+                        │
+                        ▼
+        Answer + Supporting Clause References
+```
+
+---
+
+# 📂 Project Structure
+
+```text
+LexGraph/
+│
+├── app.py                         # Streamlit application
+├── requirements.txt
+├── README.md
+│
+├── tests/
+│   └── test_clause_parser.py
+│
+└── utils/
+    ├── answer_generator.py
+    ├── clause_parser.py
+    ├── embedder.py
+    ├── extractor.py
+    ├── graph_builder.py
+    ├── llm_extractor.py
+    ├── neo4j_handler.py
+    ├── pdf_loader.py
+    ├── query_engine.py
+    └── vector_store.py
+```
+
+---
+
+# ⚙️ Technology Stack
+
+| Category       | Technologies                        |
+| -------------- | ----------------------------------- |
+| Language       | Python                              |
+| UI             | Streamlit                           |
+| Vector Search  | FAISS                               |
+| Graph Database | Neo4j                               |
+| LLM API        | OpenAI Compatible APIs / OpenRouter |
+| Embeddings     | HuggingFace Models                  |
+| Retrieval      | Hybrid GraphRAG                     |
+
+---
+
+# 🚀 Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/manasgoyal02/Lexgraph.git
+cd Lexgraph
+```
+
+Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Environment Variables
+---
 
-Create `.env` in project root.
+# 🔐 Environment Variables
 
-Required for LLM answering:
+Create a `.env` file in the project root.
+
+### LLM Configuration
 
 ```env
 OPENAI_API_KEY=your_key
-MODEL_NAME=your_model_name
+MODEL_NAME=your_model
 ```
 
-Optional:
+### Optional Configuration
 
 ```env
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
+
 HF_TOKEN=your_huggingface_token
+
 MODEL_NAME_EMBEDDING=qwen/qwen3-embedding-0.6b
 MODEL_NAME_EMBEDDING_FALLBACK=nvidia/llama-nemotron-embed-vl-1b-v2:free
 ```
 
-Required for Neo4j GraphRAG:
+### Neo4j Configuration
 
 ```env
 NEO4J_URI=bolt://localhost:7687
@@ -75,51 +140,62 @@ NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_password
 ```
 
-## Run
+---
+
+# ▶️ Running the Application
 
 ```bash
-python -m streamlit run app.py
+streamlit run app.py
 ```
 
-## Retrieval and Answering Flow
+---
 
-1. Parse contract and build clause corpus.
-2. Classify user query into clause type(s) with confidence.
-3. Route retrieval:
-   - high confidence: typed-priority hybrid
-   - medium confidence: balanced hybrid
-   - low confidence: semantic-priority
-4. Merge typed + semantic candidates.
-5. Expand with graph context (adaptive multi-hop).
-6. Run missing-clause detection for governing clause families and recover missing types when possible.
-7. Send reduced evidence context to LLM (not full contract dump).
-8. Return:
-   - final legal answer
-   - supporting clauses
+# 🔄 Retrieval Pipeline
 
-## Safety and Reliability Layers
+LexGraph follows a multi-stage retrieval pipeline:
 
-- Confidence-aware answering:
-  - computes answer confidence from retrieval quality and completeness
-  - applies cautious response policy on medium/low confidence
-- Unsafe-claim guard:
-  - blocks hard negative/conclusive statements unless evidence is strong
-  - rewrites risky claims to evidence-scoped language
+1. Parse uploaded contract into clauses.
+2. Generate semantic embeddings.
+3. Detect clause types.
+4. Build or update the Neo4j knowledge graph.
+5. Classify the user's legal query.
+6. Select retrieval strategy:
 
-## Notes
+   * High confidence → Clause-aware hybrid retrieval
+   * Medium confidence → Balanced retrieval
+   * Low confidence → Semantic-first retrieval
+7. Expand retrieved context through graph neighbors.
+8. Recover missing governing clauses when applicable.
+9. Generate an evidence-grounded response using the LLM.
+10. Return the answer along with supporting clauses.
 
-- If Neo4j is unavailable, app has fallback behavior, but full graph expansion and typed graph retrieval require Neo4j.
-- First embedding model load can be slow due to model download/cache warm-up.
+---
 
-## Testing
+# 🛡️ Reliability & Safety
 
-Current tests:
+### Confidence-Aware Answering
+
+The system evaluates retrieval quality before generating a response and adjusts answer confidence accordingly.
+
+### Unsafe Claim Guard
+
+LexGraph avoids unsupported legal conclusions by:
+
+* Blocking unsupported hard-negative claims
+* Rewriting uncertain responses into evidence-backed statements
+* Restricting answers to retrieved context only
+
+---
+
+# 🧪 Testing
+
+Run the parser tests:
 
 ```bash
 python tests/test_clause_parser.py
 ```
 
-Compile checks:
+Compile important modules:
 
 ```bash
 python -m py_compile app.py
@@ -127,7 +203,19 @@ python -m py_compile utils/query_engine.py
 python -m py_compile utils/answer_generator.py
 ```
 
-## Suggested Next Step
+---
 
-Add an automated evaluation set (20-50 legal queries with expected clause references) to track retrieval/citation quality over changes.
+# 📌 Future Improvements
 
+* Automated evaluation benchmark for legal QA
+* Retrieval quality metrics
+* Graph visualization dashboard
+* Multi-document contract reasoning
+* Clause citation scoring
+* Support for additional legal document formats
+
+---
+
+# 📜 License
+
+This project is intended for educational and research purposes.
