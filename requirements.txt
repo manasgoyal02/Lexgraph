@@ -1,0 +1,9 @@
+pymupdf
+python-dotenv
+pydantic
+streamlit
+openai
+neo4j
+sentence-transformers
+faiss-cpu
+numpy

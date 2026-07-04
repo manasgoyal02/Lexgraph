@@ -1,0 +1,13 @@
+# Secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local generated artifacts
+output/
+data/sample_contracts/
+
+# Streamlit local config
+.streamlit/
